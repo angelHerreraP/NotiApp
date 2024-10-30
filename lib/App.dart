@@ -1,47 +1,100 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+import 'Menu/bottom_menu.dart';
 
-class MyApp extends StatelessWidget {
+class App extends StatefulWidget {
+  const App({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Noticias App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomeScreen(),
-    );
-  }
+  State<App> createState() => _AppState();
 }
 
-class HomeScreen extends StatelessWidget {
+class _AppState extends State<App> {
+  int index = 0;
+  BNavigator? myBNB;
+
+  @override
+  void initState() {
+    super.initState();
+    myBNB = BNavigator(currentIndex: (i) {
+      setState(() {
+        index = i;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Noticias App'),
       ),
-      body: ListView(
-        children: [
-          NewsCard(
-            title: 'Título de la Noticia',
-            content: 'Contenido breve de la noticia.',
-            imageUrl: 'https://via.placeholder.com/150',
-          ),
-          NewsCard(
-            title: 'Otra Noticia',
-            content: 'Descripción de otra noticia.',
-            imageUrl: 'https://via.placeholder.com/150',
-          ),
-        ],
-      ),
+      body: Routes(index: index), // Cuerpo dinámico basado en el índice
+      bottomNavigationBar: myBNB, // Barra de navegación inferior
     );
   }
 }
 
+class Routes extends StatelessWidget {
+  final int index;
+
+  const Routes({required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    switch (index) {
+      case 0: // Noticias Generales
+        return ListView(
+          children: const [
+            NewsCard(
+              title: 'Titular General 1',
+              content: 'Resumen breve de la noticia general 1.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+            NewsCard(
+              title: 'Titular General 2',
+              content: 'Resumen breve de la noticia general 2.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+          ],
+        );
+      case 1: // Deportes
+        return ListView(
+          children: const [
+            NewsCard(
+              title: 'Noticias de Deportes 1',
+              content: 'Resumen breve de la noticia de deportes 1.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+            NewsCard(
+              title: 'Noticias de Deportes 2',
+              content: 'Resumen breve de la noticia de deportes 2.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+          ],
+        );
+      case 2: // Cultura / Ciencia
+        return ListView(
+          children: const [
+            NewsCard(
+              title: 'Cultura y Ciencia 1',
+              content: 'Resumen breve de la noticia de cultura/ciencia 1.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+            NewsCard(
+              title: 'Cultura y Ciencia 2',
+              content: 'Resumen breve de la noticia de cultura/ciencia 2.',
+              imageUrl: 'https://via.placeholder.com/150',
+            ),
+          ],
+        );
+      default:
+        return Center(
+          child: Text('Sección no encontrada'),
+        );
+    }
+  }
+}
 
 class NewsCard extends StatelessWidget {
   final String title;
@@ -59,7 +112,7 @@ class NewsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -67,26 +120,24 @@ class NewsCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               content,
-              style: TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Image.network(
               imageUrl,
               fit: BoxFit.cover,
               height: 150,
               width: double.infinity,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () {
-                
-              },
-              child: Text('More Info'),
+              onPressed: () {},
+              child: const Text('Más información'),
             ),
           ],
         ),
