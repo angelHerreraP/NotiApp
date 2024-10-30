@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/main_screen.dart'; 
+import 'package:news_app/Menu/noticias.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
