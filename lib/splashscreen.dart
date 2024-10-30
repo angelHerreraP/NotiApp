@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/Menu/noticias.dart';
+import 'package:noticias_app/Menu/noticias.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()), 
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       }
     });
@@ -23,10 +23,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent[100], 
+      backgroundColor: Colors.blueAccent[100],
       body: Center(
         child: Image.asset(
-          'assets/images/nohayfoto.png', 
+          'assets/images/nohayfoto.png',
           fit: BoxFit.cover,
           width: 200,
           height: 200,
