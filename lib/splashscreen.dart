@@ -1,15 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:news_app/main_screen.dart'; 
 
-class splashScreen extends StatefulWidget {
-  const splashScreen({super.key});
-
+class SplashScreen extends StatefulWidget {
   @override
-  State<splashScreen> createState() => _splashScreenState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _splashScreenState extends State<splashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()), 
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Colors.blueAccent[100], 
+      body: Center(
+        child: Image.asset(
+          'assets/images/nohayfoto.png', 
+          fit: BoxFit.cover,
+          width: 200,
+          height: 200,
+        ),
+      ),
+    );
   }
 }
