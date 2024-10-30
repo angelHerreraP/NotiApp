@@ -1,34 +1,67 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'Menu/bottom_menu.dart';
+import 'NewsService.dart'; // Asegúrate de que esta importación sea correcta
 
-class NewsService {
-  final String apiKey = '6e52572e-14b3-4aa4-8adc-dde146ed6db9';
+class NewsCard extends StatelessWidget {
+  final String title;
+  final String content;
+  final String imageUrl;
+  final String newsUrl; // Añadir una propiedad para la URL de la noticia
 
-  Future<List<dynamic>> fetchNews(String category) async {
-    final queryParameters = {
-      'api-key': apiKey,
-      'q': 'mexico',
-      'section': category,
-      'show-fields': 'headline,thumbnail,short-url'
-    };
+  const NewsCard({
+    required this.title,
+    required this.content,
+    required this.imageUrl,
+    required this.newsUrl, // Asegúrate de que esta propiedad esté requerida
+    Key? key,
+  }) : super(key: key);
 
-    final uri =
-        Uri.https('content.guardianapis.com', '/search', queryParameters);
-
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      final List<dynamic> results = data['response']['results'];
-      return results;
+  // Función para abrir la URL en el navegador
+  void _launchURL() async {
+    if (await canLaunch(newsUrl)) {
+      await launch(newsUrl);
     } else {
-      throw Exception('Error al cargar noticias');
+      throw 'No se pudo abrir $newsUrl';
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4),
+            Text(
+              content,
+              style: TextStyle(fontSize: 14),
+            ),
+            SizedBox(height: 8),
+            Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              height: 150,
+              width: double.infinity,
+            ),
+            SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _launchURL,
+              child: Text('Más Información'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -42,6 +75,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   int index = 0;
   BNavigator? myBNB;
+  late Future<List<dynamic>> news;
 
   @override
   void initState() {
@@ -49,8 +83,29 @@ class _AppState extends State<App> {
     myBNB = BNavigator(currentIndex: (i) {
       setState(() {
         index = i;
+        // Cargar noticias cada vez que cambia el índice
+        news = loadNews(index);
       });
     });
+    news = loadNews(index); // Cargar noticias iniciales
+  }
+
+  Future<List<dynamic>> loadNews(int index) {
+    String category = '';
+    switch (index) {
+      case 0:
+        category = 'news';
+        break;
+      case 1:
+        category = 'sport';
+        break;
+      case 2:
+        category = 'culture';
+        break;
+      default:
+        category = 'news';
+    }
+    return NewsService().fetchNews(category);
   }
 
   @override
@@ -59,121 +114,41 @@ class _AppState extends State<App> {
       appBar: AppBar(
         title: const Text('Noticias App'),
       ),
-      body: Routes(index: index), // Cuerpo dinámico basado en el índice
-      bottomNavigationBar: myBNB, // Barra de navegación inferior
-    );
-  }
-}
+      body: FutureBuilder<List<dynamic>>(
+        future: news,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No hay noticias disponibles.'));
+          }
 
-class Routes extends StatelessWidget {
-  final int index;
-  final NewsService newsService = NewsService(); // Instancia de NewsService
-
-  Routes({required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    String category = '';
-
-    switch (index) {
-      case 0:
-        category = 'news'; // Noticias generales
-        break;
-      case 1:
-        category = 'sport'; // Deportes
-        break;
-      case 2:
-        category = 'culture'; // Cultura / Ciencia
-        break;
-      default:
-        return Center(child: Text('Sección no encontrada'));
-    }
-
-    return FutureBuilder(
-      future: newsService.fetchNews(category),
-      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error al cargar noticias'));
-        } else if (snapshot.hasData) {
-          final newsList = snapshot.data!;
+          // Asegúrate de que estás accediendo a los campos correctos
+          final newsArticles = snapshot.data!;
           return ListView.builder(
-            itemCount: newsList.length,
+            itemCount: newsArticles.length,
             itemBuilder: (context, index) {
-              final news = newsList[index];
-              final String title = news['fields']['headline'];
-              final String imageUrl = news['fields']['thumbnail'] ??
+              final article = newsArticles[index];
+              final title = article['webTitle'] ?? 'Sin título';
+              final content =
+                  article['fields']?['trailText'] ?? 'Sin contenido';
+              final imageUrl = article['fields']?['thumbnail'] ??
                   'https://via.placeholder.com/150';
-              final String url = news['webUrl'];
+              final newsUrl = article['webUrl'] ?? '';
 
               return NewsCard(
                 title: title,
+                content: content,
                 imageUrl: imageUrl,
-                url: url,
+                newsUrl: newsUrl,
               );
             },
           );
-        } else {
-          return const Center(child: Text('No se encontraron noticias'));
-        }
-      },
-    );
-  }
-}
-
-class NewsCard extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-  final String url;
-
-  const NewsCard({
-    required this.title,
-    required this.imageUrl,
-    required this.url,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              height: 150,
-              width: double.infinity,
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () {
-                // Navegar al enlace de la noticia
-                launchUrl(url);
-              },
-              child: const Text('Leer más'),
-            ),
-          ],
-        ),
+        },
       ),
+      bottomNavigationBar: myBNB,
     );
-  }
-}
-
-void launchUrl(String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'No se pudo abrir el enlace $url';
   }
 }
