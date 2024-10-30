@@ -8,13 +8,13 @@ class NewsCard extends StatelessWidget {
   final String title;
   final String content;
   final String imageUrl;
-  final String newsUrl; // Añadir una propiedad para la URL de la noticia
+  final String newsUrl;
 
   const NewsCard({
     required this.title,
     required this.content,
     required this.imageUrl,
-    required this.newsUrl, // Asegúrate de que esta propiedad esté requerida
+    required this.newsUrl,
     Key? key,
   }) : super(key: key);
 
@@ -55,7 +55,7 @@ class NewsCard extends StatelessWidget {
             ),
             SizedBox(height: 8),
             ElevatedButton(
-              onPressed: _launchURL,
+              onPressed: _launchURL, // Cambia esto para usar la función
               child: Text('Más Información'),
             ),
           ],
