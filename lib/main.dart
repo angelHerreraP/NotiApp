@@ -5,7 +5,7 @@ import 'splashscreen.dart'; // Importa tu SplashScreen
 void main() {
   runApp(const MyApp());
 }
-3
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:noticias_app/Menu/noticias.dart';
+import 'package:noticias_app/App.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => App()),
         );
       }
     });
